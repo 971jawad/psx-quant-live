@@ -1,0 +1,47 @@
+name: Daily dashboard
+
+on:
+  schedule:
+    # 13:30 UTC = 18:30 PKT, shortly after psx-quant's own daily run commits
+    - cron: "30 13 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # commit refreshed docs/ (Pages serves main:/docs)
+
+concurrency:
+  group: daily-dashboard
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up read-only deploy key for the private psx-quant repo
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.PSX_QUANT_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Clone psx-quant (read-only, shallow)
+        run: GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes" git clone --depth 1 git@github.com:971jawad/psx-quant.git "$RUNNER_TEMP/psx-quant-src"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install --quiet pandas pyarrow numpy
+      - name: Build dashboard
+        run: python build_dashboard.py "$RUNNER_TEMP/psx-quant-src"
+      - name: Commit refreshed dashboard
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/index.html
+          if git diff --cached --quiet; then
+            echo "No change."
+          else
+            git commit -m "Daily dashboard $(date -u +%Y-%m-%d)"
+            git push
+          fi

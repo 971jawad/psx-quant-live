@@ -1,0 +1,41 @@
+<meta charset="utf-8">
+<title>PSX Quant Live</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--bg:#f6f7f9;--panel:#fff;--bd:#dde3ea;--ink:#0f1720;--mut:#5b6876;--acc:#c8791a;--up:#1a7f37;--down:#c9302c;
+--mono:"Cascadia Code","SF Mono",Consolas,ui-monospace,monospace;--sans:"Segoe UI",system-ui,sans-serif;}
+@media(prefers-color-scheme:dark){:root{--bg:#0a0e14;--panel:#111823;--bd:#1f2a37;--ink:#e6edf3;--mut:#8b97a6;--acc:#f5a623;--up:#3fb950;--down:#f85149;}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding:28px 18px 70px}
+h1{font-family:var(--mono);letter-spacing:.02em;margin:0 0 4px}h1 b{color:var(--acc)}
+.sub{color:var(--mut);margin-bottom:22px}
+.card{background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+h2{font-size:14px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:0 0 12px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:right;padding:6px 9px;border-bottom:1px solid var(--bd);white-space:nowrap}
+th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--mut)}th:first-child,td:first-child{text-align:left}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}.mono{font-family:var(--mono)}.up{color:var(--up)}.down{color:var(--down)}.muted{color:var(--mut)}
+.note{font-size:13px;color:var(--mut);border-left:2px solid var(--acc);padding-left:11px;margin-top:14px}
+.chip{display:inline-block;font-family:var(--mono);font-size:12px;border:1px solid var(--bd);border-radius:999px;padding:3px 10px;color:var(--mut)}
+a{color:var(--acc)}
+</style>
+<div class="wrap">
+<h1>PSX<b>·</b>QUANT LIVE</h1>
+<div class="sub">Honest live scoreboard for the PSX quant research project · data through <span class="mono">2026-08-13</span> · <span class="chip">37 open picks</span></div>
+<div class="card">
+<h2>Live scoreboard — v1 (primary) vs v2 (meta-filtered), resolved picks</h2>
+<table><thead><tr><th>Horizon</th><th>Variant</th><th>n</th><th>Avg net/trade</th><th>Win rate</th><th>Cumulative</th></tr></thead>
+<tbody><tr><td>D5</td><td>v1</td><td class=num>57</td><td class='num up'>+0.46%</td><td class=num>51%</td><td class='num up'>+12.3%</td></tr><tr><td>D5</td><td>v2</td><td class=num>48</td><td class='num up'>+0.96%</td><td class=num>48%</td><td class='num up'>+45.5%</td></tr><tr><td>W</td><td>v1</td><td class=num>20</td><td class='num up'>+1.42%</td><td class=num>50%</td><td class='num up'>+26.1%</td></tr><tr><td>W</td><td>v2</td><td class=num>2</td><td class='num down'>-0.77%</td><td class=num>50%</td><td class='num down'>-1.6%</td></tr></tbody></table>
+<div class="note">Every pick is logged before the outcome is known and scored on genuinely out-of-sample data. Net of round-trip cost. This is the honest live record — nothing here is validated alpha; the scoreboard exists to measure it before any money is risked.</div>
+</div>
+<div class="card">
+<h2>Latest open picks (awaiting resolution)</h2>
+<table><thead><tr><th>Pred date</th><th>Horizon</th><th>Variant</th><th>Symbol</th><th>Entry</th></tr></thead>
+<tbody><tr><td class=mono>2026-08-13</td><td>D5</td><td>v1</td><td>TICL</td><td class=num>1459.28</td></tr><tr><td class=mono>2026-08-13</td><td>D5</td><td>v1</td><td>MEHT</td><td class=num>148.1</td></tr><tr><td class=mono>2026-08-13</td><td>D5</td><td>v1</td><td>DSIL</td><td class=num>13.56</td></tr><tr><td class=mono>2026-08-12</td><td>D5</td><td>v1</td><td>DSIL</td><td class=num>15.07</td></tr><tr><td class=mono>2026-08-12</td><td>D5</td><td>v1</td><td>WAFI</td><td class=num>184.79</td></tr><tr><td class=mono>2026-08-12</td><td>D5</td><td>v1</td><td>BERG</td><td class=num>128.82</td></tr><tr><td class=mono>2026-08-12</td><td>D5</td><td>v2</td><td>BNL</td><td class=num>6.63</td></tr><tr><td class=mono>2026-08-12</td><td>D5</td><td>v2</td><td>MEBL</td><td class=num>591.13</td></tr><tr><td class=mono>2026-08-11</td><td>D5</td><td>v1</td><td>WAFI</td><td class=num>182.21</td></tr><tr><td class=mono>2026-08-11</td><td>D5</td><td>v1</td><td>FCEPL</td><td class=num>121.4</td></tr><tr><td class=mono>2026-08-11</td><td>D5</td><td>v1</td><td>TPLT</td><td class=num>29.84</td></tr><tr><td class=mono>2026-08-10</td><td>D5</td><td>v1</td><td>TICL</td><td class=num>1467.28</td></tr></tbody></table>
+</div>
+<div class="card">
+<h2>The one real edge — market timing (honest bottom line)</h2>
+<div style="font-size:14px">Five methods on PSX daily OHLCV: no stock-selection edge. But **market timing is a genuine, robust, out-of-sample, cost-surviving edge** — the first and only thing in this project that survives adversarial scrutiny. It won't make you rich in a bull faster than just holding; it will keep you out of the −40% crashes and roughly double your risk-adjusted return. For a real portfolio, that is worth more than another failed stock-picker.</div>
+<div class="note">Full method &amp; caveats in the project's REPORT_EDGE. Research, not investment advice.</div>
+</div>
+<div class="sub" style="margin-top:24px;font-size:12px">Auto-generated daily from the private psx-quant project (read-only). Sister project: <a href="https://971jawad.github.io/pak-terminal/">Pak Terminal</a>.</div>
+</div>

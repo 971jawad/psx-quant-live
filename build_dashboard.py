@@ -29,10 +29,15 @@ def scoreboard_summary(sb: pd.DataFrame):
     return pd.DataFrame(rows), len(sb) - len(done)
 
 
-def latest_open(sb: pd.DataFrame, k=12):
+def open_picks(sb: pd.DataFrame):
     op = sb[~sb.resolved.astype(str).str.lower().isin(["true", "1"])].copy()
-    op = op.sort_values("pred_date", ascending=False)
-    return op.head(k)[["pred_date", "horizon", "variant", "symbol", "entry_close"]]
+    return op.sort_values(["pred_date", "horizon"], ascending=[False, True])
+
+
+def resolved_picks(sb: pd.DataFrame):
+    dn = sb[sb.resolved.astype(str).str.lower().isin(["true", "1"])].copy()
+    dn["net_ret"] = pd.to_numeric(dn["net_ret"], errors="coerce")
+    return dn.dropna(subset=["net_ret"]).sort_values(["pred_date", "horizon"], ascending=[False, True])
 
 
 def edge_highlights(md: str):
@@ -45,7 +50,8 @@ def edge_highlights(md: str):
 def build():
     sb = pd.read_csv(SRC / "predictions" / "scoreboard.csv")
     summ, n_open = scoreboard_summary(sb)
-    open_tbl = latest_open(sb)
+    op = open_picks(sb)
+    res = resolved_picks(sb)
     edge_md = (SRC / "reports" / "REPORT_EDGE.md").read_text(encoding="utf-8") \
         if (SRC / "reports" / "REPORT_EDGE.md").exists() else ""
     bottom = edge_highlights(edge_md)
@@ -59,15 +65,25 @@ def build():
                 f"<td class='num {'up' if r.cum>0 else 'down'}'>{r.cum*100:+.1f}%</td></tr>")
     srows = "".join(srow(r) for _, r in summ.iterrows()) or "<tr><td colspan=6 class=muted>no resolved picks yet</td></tr>"
     orows = "".join(f"<tr><td class=mono>{r.pred_date}</td><td>{r.horizon}</td><td>{r.variant}</td>"
-                    f"<td>{r.symbol}</td><td class=num>{r.entry_close}</td></tr>"
-                    for _, r in open_tbl.iterrows())
-    html = TEMPLATE.replace("__ASOF__", str(as_of)).replace("__SROWS__", srows) \
-        .replace("__OROWS__", orows).replace("__NOPEN__", str(n_open)) \
-        .replace("__BOTTOM__", bottom.replace("\n", " "))
+                    f"<td><b>{r.symbol}</b></td><td class=num>{r.entry_close}</td></tr>"
+                    for _, r in op.iterrows()) or "<tr><td colspan=5 class=muted>none open</td></tr>"
+
+    def rrow(r):
+        c = "up" if r.net_ret > 0 else "down"
+        return (f"<tr><td class=mono>{r.pred_date}</td><td>{r.horizon}</td><td>{r.variant}</td>"
+                f"<td><b>{r.symbol}</b></td><td class=num>{r.entry_close}</td>"
+                f"<td class=mono>{'' if pd.isna(r.exit_date) else str(r.exit_date)}</td>"
+                f"<td class='num {c}'>{r.net_ret*100:+.2f}%</td></tr>")
+    rrows = "".join(rrow(r) for _, r in res.iterrows()) or "<tr><td colspan=7 class=muted>no resolved picks yet</td></tr>"
+
+    html = (TEMPLATE.replace("__ASOF__", str(as_of)).replace("__SROWS__", srows)
+            .replace("__OROWS__", orows).replace("__RROWS__", rrows)
+            .replace("__NOPEN__", str(n_open)).replace("__NRES__", str(len(res)))
+            .replace("__BOTTOM__", bottom.replace("\n", " ")))
     out = HERE / "docs" / "index.html"
     out.parent.mkdir(exist_ok=True)
     out.write_text(html, encoding="utf-8")
-    print(f"wrote {out} (as of {as_of}, {len(summ)} resolved groups, {n_open} open)")
+    print(f"wrote {out} (as of {as_of}, {n_open} open, {len(res)} resolved picks shown)")
 
 
 TEMPLATE = """<meta charset="utf-8">
@@ -87,6 +103,8 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:right;
 th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--mut)}th:first-child,td:first-child{text-align:left}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums}.mono{font-family:var(--mono)}.up{color:var(--up)}.down{color:var(--down)}.muted{color:var(--mut)}
 .note{font-size:13px;color:var(--mut);border-left:2px solid var(--acc);padding-left:11px;margin-top:14px}
+.scroll{max-height:440px;overflow:auto;border:1px solid var(--bd);border-radius:8px}
+.scroll th{position:sticky;top:0;background:var(--panel)}
 .chip{display:inline-block;font-family:var(--mono);font-size:12px;border:1px solid var(--bd);border-radius:999px;padding:3px 10px;color:var(--mut)}
 a{color:var(--acc)}
 </style>
@@ -100,9 +118,15 @@ a{color:var(--acc)}
 <div class="note">Every pick is logged before the outcome is known and scored on genuinely out-of-sample data. Net of round-trip cost. This is the honest live record — nothing here is validated alpha; the scoreboard exists to measure it before any money is risked.</div>
 </div>
 <div class="card">
-<h2>Latest open picks (awaiting resolution)</h2>
-<table><thead><tr><th>Pred date</th><th>Horizon</th><th>Variant</th><th>Symbol</th><th>Entry</th></tr></thead>
-<tbody>__OROWS__</tbody></table>
+<h2>Live / open picks (__NOPEN__) — tickers &amp; entry, awaiting outcome</h2>
+<div class="scroll"><table><thead><tr><th>Pred date</th><th>Horizon</th><th>Var</th><th>Ticker</th><th>Entry</th></tr></thead>
+<tbody>__OROWS__</tbody></table></div>
+</div>
+<div class="card">
+<h2>Resolved picks (__NRES__) — entry, exit &amp; net outcome</h2>
+<div class="scroll"><table><thead><tr><th>Pred date</th><th>Horizon</th><th>Var</th><th>Ticker</th><th>Entry</th><th>Exit date</th><th>Net</th></tr></thead>
+<tbody>__RROWS__</tbody></table></div>
+<div class="note">Every pick logged before its outcome was known, scored net of round-trip cost. Full history of tickers &amp; entry prices — not just aggregates.</div>
 </div>
 <div class="card">
 <h2>The one real edge — market timing (honest bottom line)</h2>
